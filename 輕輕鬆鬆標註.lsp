@@ -23,9 +23,14 @@
       (while (< i (1- (length ptList)))
         (setq pt1 (nth i ptList))
         (setq pt2 (nth (1+ i) ptList))
-        (setvar "OSMODE" 0) ; 關閉所有鎖點
-        (command "_.DIMLINEAR" pt1 pt2 pause)
-        (setvar "OSMODE" oldOsnap) ; 恢復鎖點
+        (if (> (distance pt1 pt2) 1e-8) ; 距離大於0才標註
+          (progn
+            (setvar "OSMODE" 0) ; 關閉所有鎖點
+            (command "_.DIMLINEAR" pt1 pt2 pause)
+            (setvar "OSMODE" oldOsnap) ; 恢復鎖點
+          )
+          (prompt (strcat "\n第 " (itoa (1+ i)) " 段長度為 0，已自動跳過。"))
+        )
         (setq i (1+ i))
       )
       (princ "\n標註完成，鎖點已恢復。")
