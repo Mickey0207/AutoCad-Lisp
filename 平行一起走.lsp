@@ -1,0 +1,41 @@
+(defun get-line-pts (ent)
+  (cond
+    ((= (cdr (assoc 0 (entget ent))) "LINE")
+     (list (cdr (assoc 10 (entget ent))) (cdr (assoc 11 (entget ent)))))
+    ((= (cdr (assoc 0 (entget ent))) "LWPOLYLINE")
+     (list (cdr (assoc 10 (entget ent))) (cdr (assoc 10 (reverse (entget ent))))))
+    (T nil)
+  )
+)
+
+(defun c:MPOLY (/ base1 base2 dir norm num i offset pt1 pt2)
+  (princ "\n請依序點選平行線的起點與終點（定義主線）:")
+  (setq base1 (getpoint "\n請點選平行線起點: "))
+  (setq base2 (getpoint "\n請點選平行線終點: "))
+  (if (and base1 base2)
+    (progn
+      (setq dir (mapcar '- base2 base1)) ; 主線方向向量
+      (setq norm (list (- (cadr dir)) (- (car dir)) 0)) ; 正交向量（Z軸為0）
+      (setq norm (mapcar '(lambda (x) (/ x (distance '(0 0 0) norm))) norm)) ; 單位化
+      (setq num (getint "\n請輸入平行線數量: "))
+      (if (and num (> num 1))
+        (progn
+          (setq total-dist (getdist base1 "\n請點選正交方向的距離終點: "))
+          (setq step (/ total-dist (- num 1)))
+          (setq i 0)
+          (while (< i num)
+            (setq offset (* i step))
+            (setq pt1 (mapcar '+ base1 (mapcar '(lambda (x) (* x offset)) norm)))
+            (setq pt2 (mapcar '+ base2 (mapcar '(lambda (x) (* x offset)) norm)))
+            (command "_.PLINE" pt1 pt2 "")
+            (setq i (1+ i))
+          )
+        )
+        (princ "\n平行線數量必須大於1。")
+      )
+    )
+    (princ "\n請正確點選兩點。")
+  )
+  (princ)
+)
+(princ "\n請輸入 MPOLY 來畫多條正交分布的平行聚合線。")
