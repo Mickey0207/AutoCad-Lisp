@@ -7,6 +7,7 @@
       (setq files (vl-directory-files folder "*.dwg" 1))
       (if files
         (progn
+          (setq files (vl-sort files '<))
           (setq idx 1)
           (foreach file files
             (setq fileName (vl-filename-base file))
@@ -25,4 +26,4 @@
   )
   (princ)
 )
-(princ "\n請輸入 BatchInsertDWG 來批次插入資料夾內所有DWG檔案。\n")
+(princ "\n請輸入 InsertDWG 來批次插入資料夾內所有DWG檔案。\n")
