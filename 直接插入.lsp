@@ -26,29 +26,3 @@
   (princ)
 )
 (princ "\n請輸入 BatchInsertDWG 來批次插入資料夾內所有DWG檔案。\n")
-
-(defun c:CopyUnfrozenToClipboard ( / ss unfrozenLayers layList filter )
-  (setq unfrozenLayers '())
-  (vlax-for lay (vla-get-Layers (vla-get-ActiveDocument (vlax-get-acad-object)))
-    (if (= (vla-get-Freeze lay) :vlax-false)
-      (setq unfrozenLayers (cons (vla-get-Name lay) unfrozenLayers))
-    )
-  )
-  (if unfrozenLayers
-    (progn
-      (setq layList (mapcar '(lambda (x) (list 8 x)) unfrozenLayers))
-      (setq filter (append (list (cons 410 (getvar "CTAB")) (cons -4 "<OR>")) layList (list (cons -4 "OR>"))))
-      (setq ss (ssget "X" filter))
-      (if ss
-        (progn
-          (command "_.COPYBASE" '(0 0 0) ss)
-          (princ "\n已複製未凍結圖層物件到剪貼簿。請切換到新圖面並執行 PASTECLIP。")
-        )
-        (princ "\n找不到未凍結圖層物件。")
-      )
-    )
-    (princ "\n找不到未凍結圖層。")
-  )
-  (princ)
-)
-(princ "\n請在來源圖面輸入 CopyUnfrozenToClipboard 複製未凍結圖層物件。\n")
